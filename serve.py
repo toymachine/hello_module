@@ -1,8 +1,9 @@
-from bottle import route, run, static_file, abort
+from bottle import route, run, static_file, abort, HTTPResponse
 
 import sys
 import os
 import zipfile
+import mimetypes
 
 @route('/')
 def index():
@@ -24,9 +25,10 @@ def statics(filepath):
             zf = zipfile.ZipFile(pkg_path)
             try:
                 content = zf.read(filepath)
-                return content #TODO set mimetype
-            except KeyError:
-                pass
+                mimetype, _ = mimetypes.guess_type(filepath)
+                return HTTPResponse(content, header = {'Content-Type': mimetype})
+            except KeyError:          
+                pass #file not found in this zip
             
     abort(404, "Not found")
 
